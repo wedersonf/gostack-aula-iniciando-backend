@@ -1,4 +1,3 @@
-import { template } from 'handlebars';
 import nodemailer, { Transporter } from 'nodemailer';
 import { inject, injectable } from 'tsyringe';
 
