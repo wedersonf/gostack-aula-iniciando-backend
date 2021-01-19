@@ -1,11 +1,10 @@
-import AppError from '@shared/errors/AppError';
 import { injectable, inject } from 'tsyringe';
 
-import IHashProvider from '../providers/HashProvider/models/IHashProvider';
-import IUsersRepository from '../repositories/IUsersRepository';
+import AppError from '@shared/errors/AppError';
 
 import User from '../infra/typeorm/entities/User';
-import passwordRouter from '../infra/http/routes/password.routes';
+import IUsersRepository from '../repositories/IUsersRepository';
+import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 
 interface IRequest {
   user_id: string;
@@ -16,12 +15,12 @@ interface IRequest {
 }
 
 @injectable()
-class UpdateProfielService {
+class UpdateProfileService {
   constructor(
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
 
-    @inject('StorageProvider')
+    @inject('HashProvider')
     private hashProvider: IHashProvider,
   ) {}
 
@@ -41,7 +40,7 @@ class UpdateProfielService {
     const userWithUpdatedEmail = await this.usersRepository.findByEmail(email);
 
     if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user_id) {
-      throw new AppError('E-mail already in user');
+      throw new AppError('E-mail already in use.');
     }
 
     user.name = name;
@@ -49,7 +48,7 @@ class UpdateProfielService {
 
     if (password && !old_password) {
       throw new AppError(
-        'You need to inform the old password to set a new password',
+        'You need to inform old password to set a new password.',
       );
     }
 
@@ -60,7 +59,7 @@ class UpdateProfielService {
       );
 
       if (!checkOldPassword) {
-        throw new AppError('Old password does not match');
+        throw new AppError('Old password does not match.');
       }
 
       user.password = await this.hashProvider.generateHash(password);
@@ -70,4 +69,4 @@ class UpdateProfielService {
   }
 }
 
-export default UpdateProfielService;
+export default UpdateProfileService;
